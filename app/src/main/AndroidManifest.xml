@@ -13,7 +13,7 @@
         <service android:name="net.zekjur.davsync.UploadService" />
 
         <activity
-            android:name="net.zekjur.davsync.MainActivity"
+            android:name="net.zekjur.davsync.activity.MainActivity"
             android:label="@string/app_name">
 
 			<intent-filter>
