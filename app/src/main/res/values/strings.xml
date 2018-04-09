@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">DavSync</string>
-    <string name="action_settings">DavSync Settings</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="title_activity_share">Share via DavSync</string>
+	<string name="app_name">WebDAV Sync</string>
+	<string name="uploading_to_webdav_server">Uploading to WebDAV server</string>
+
+	<string name="notification_channel_upload">Upload</string>
+	<string name="notification_channel_upload_description">Your file uploads</string>
+
+	<string name="pref_sync_images">Upload Images</string>
+	<string name="pref_sync_video">Upload Videos</string>
+	<string name="pref_wifi_only">Upload On WiFi Only</string>
+	<string name="pref_compress">Compress Images Before Upload</string>
+	<string name="pref_compress_summary">Images will be slightly compressed before upload to reduce data usage and server storage usage</string>
+	<string name="pref_battery">Upload Only When Charging</string>
 
 </resources>
