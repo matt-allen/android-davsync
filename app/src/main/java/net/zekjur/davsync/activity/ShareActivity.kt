@@ -1,10 +1,11 @@
-package net.zekjur.davsync
+package net.zekjur.davsync.activity
 
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
+import net.zekjur.davsync.UploadService
 
 /**
  * This Activity responds to the Android share intent and posts each of

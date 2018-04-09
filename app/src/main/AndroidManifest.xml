@@ -24,7 +24,7 @@
         </activity>
 
         <activity
-            android:name="net.zekjur.davsync.ShareActivity"
+            android:name="net.zekjur.davsync.activity.ShareActivity"
             android:excludeFromRecents="true"
             android:theme="@android:style/Theme.NoDisplay" >
 
