@@ -29,8 +29,10 @@ import android.app.Notification;
 import android.app.Notification.Builder;
 import android.util.Log;
 
-public class UploadService extends IntentService {
-	public UploadService() {
+public class UploadService extends IntentService
+{
+	public UploadService()
+	{
 		super("UploadService");
 	}
 
@@ -38,11 +40,14 @@ public class UploadService extends IntentService {
 	 * Resolve a Uri like “content://media/external/images/media/9210” to an
 	 * actual filename, like “IMG_20130304_181119.jpg”
 	 */
-	private String filenameFromUri(Uri uri) {
-		String[] projection = { MediaStore.Images.Media.DATA };
+	private String filenameFromUri(Uri uri)
+	{
+		String[] projection = {MediaStore.Images.Media.DATA};
 		Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
 		if (cursor == null || cursor.getCount() == 0)
+		{
 			return null;
+		}
 		int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
 		cursor.moveToFirst();
 		Uri filePathUri = Uri.parse(cursor.getString(column_index));
@@ -50,7 +55,8 @@ public class UploadService extends IntentService {
 	}
 
 	@Override
-	protected void onHandleIntent(Intent intent) {
+	protected void onHandleIntent(Intent intent)
+	{
 		final Uri uri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
 		Log.d("davsyncs", "Uploading " + uri.toString());
 
@@ -59,7 +65,8 @@ public class UploadService extends IntentService {
 		String webdavUrl = preferences.getString("webdav_url", null);
 		String webdavUser = preferences.getString("webdav_user", null);
 		String webdavPassword = preferences.getString("webdav_password", null);
-		if (webdavUrl == null) {
+		if (webdavUrl == null)
+		{
 			Log.d("davsyncs", "No WebDAV URL set up.");
 			return;
 		}
@@ -67,7 +74,8 @@ public class UploadService extends IntentService {
 		ContentResolver cr = getContentResolver();
 
 		String filename = this.filenameFromUri(uri);
-		if (filename == null) {
+		if (filename == null)
+		{
 			Log.d("davsyncs", "filenameFromUri returned null");
 			return;
 		}
@@ -85,18 +93,23 @@ public class UploadService extends IntentService {
 
 		ParcelFileDescriptor fd;
 		InputStream stream;
-		try {
+		try
+		{
 			fd = cr.openFileDescriptor(uri, "r");
 			stream = cr.openInputStream(uri);
-		} catch (FileNotFoundException e1) {
+		}
+		catch (FileNotFoundException e1)
+		{
 			e1.printStackTrace();
 			return;
 		}
 
 		CountingInputStreamEntity entity = new CountingInputStreamEntity(stream, fd.getStatSize());
-		entity.setUploadListener(new UploadListener() {
+		entity.setUploadListener(new UploadListener()
+		{
 			@Override
-			public void onChange(int percent) {
+			public void onChange(int percent)
+			{
 				mBuilder.setProgress(100, percent, false);
 				mNotificationManager.notify(uri.toString(), 0, mBuilder.build());
 			}
@@ -106,25 +119,31 @@ public class UploadService extends IntentService {
 
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 
-		if (webdavUser != null && webdavPassword != null) {
+		if (webdavUser != null && webdavPassword != null)
+		{
 			AuthScope authScope = new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT);
 			UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(webdavUser, webdavPassword);
 			httpClient.getCredentialsProvider().setCredentials(authScope, credentials);
 
-			try {
+			try
+			{
 				httpPut.addHeader(new BasicScheme().authenticate(credentials, httpPut));
-			} catch (AuthenticationException e1) {
+			}
+			catch (AuthenticationException e1)
+			{
 				e1.printStackTrace();
 				return;
 			}
 		}
 
-		try {
+		try
+		{
 			HttpResponse response = httpClient.execute(httpPut);
 			int status = response.getStatusLine().getStatusCode();
 			// 201 means the file was created.
 			// 200 and 204 mean it was stored but already existed.
-			if (status == 201 || status == 200 || status == 204) {
+			if (status == 201 || status == 200 || status == 204)
+			{
 				// The file was uploaded, so we remove the ongoing notification,
 				// remove it from the queue and that’s it.
 				mNotificationManager.cancel(uri.toString(), 0);
@@ -134,10 +153,14 @@ public class UploadService extends IntentService {
 			}
 			Log.d("davsyncs", "" + response.getStatusLine());
 			mBuilder.setContentText(filename + ": " + response.getStatusLine());
-		} catch (ClientProtocolException e) {
+		}
+		catch (ClientProtocolException e)
+		{
 			e.printStackTrace();
 			mBuilder.setContentText(filename + ": " + e.getLocalizedMessage());
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			e.printStackTrace();
 			mBuilder.setContentText(filename + ": " + e.getLocalizedMessage());
 		}

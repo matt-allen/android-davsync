@@ -1,12 +1,8 @@
-// Based on code from Ben Hardill:
-// http://www.hardill.me.uk/wordpress/?p=646
 package net.zekjur.davsync;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import org.apache.http.entity.InputStreamEntity;
 
 public class CountingInputStreamEntity extends InputStreamEntity {
 	private UploadListener listener;
