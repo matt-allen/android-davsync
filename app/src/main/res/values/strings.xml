@@ -13,5 +13,7 @@
 	<string name="pref_compress">Compress Images Before Upload</string>
 	<string name="pref_compress_summary">Images will be slightly compressed before upload to reduce data usage and server storage usage</string>
 	<string name="pref_battery">Upload Only When Charging</string>
+	<string name="server">Server</string>
+	<string name="settings">Settings</string>
 
 </resources>
