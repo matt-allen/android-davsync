@@ -57,10 +57,10 @@ class UploadService: IntentService("UploadService")
 	{
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
 		{
-			val name = getString(R.string.notification_channel_upload)
-			val channel = NotificationChannel(notificationChannel, name, NotificationManagerCompat.IMPORTANCE_LOW)
-			channel.description = getString(R.string.notification_channel_upload_description)
-			getNotificationManager().createNotificationChannel(channel)
+//			val name = getString(R.string.notification_channel_upload)
+//			val channel = NotificationChannel(notificationChannel, name, NotificationManagerCompat.IMPORTANCE_LOW)
+//			channel.description = getString(R.string.notification_channel_upload_description)
+//			getNotificationManager().createNotificationChannel(channel)
 		}
 		getNotificationManager().notify(uploadNotification, getUploadNotification(filename))
 	}
