@@ -3,6 +3,18 @@
 
 	<string name="app_name">WebDAV Sync</string>
 	<string name="uploading_to_webdav_server">Uploading to WebDAV server</string>
+	<string name="server">Server</string>
+	<string name="settings">Settings</string>
+	<string name="your_webdav_server">Your WebDAV Server</string>
+	<string name="server_url">Server URL</string>
+	<string name="username">Username</string>
+	<string name="password">Password</string>
+	<string name="save">Save</string>
+	<string name="updated_server_settings">Updated your server settings</string>
+	<string name="enter_valid_url">Please enter valid URL</string>
+	<string name="enter_valid_username">Please enter your username</string>
+	<string name="enter_valid_password">Please enter your password</string>
+	<string name="wait_until_not_using_battery">Uploads will wait until the device is not using battery power</string>
 
 	<string name="notification_channel_upload">Upload</string>
 	<string name="notification_channel_upload_description">Your file uploads</string>
@@ -13,12 +25,5 @@
 	<string name="pref_compress">Compress Images Before Upload</string>
 	<string name="pref_compress_summary">Images will be slightly compressed before upload to reduce data usage and server storage usage</string>
 	<string name="pref_battery">Upload Only When Charging</string>
-	<string name="server">Server</string>
-	<string name="settings">Settings</string>
-	<string name="your_webdav_server">Your WebDAV Server</string>
-	<string name="server_url">Server URL</string>
-	<string name="username">Username</string>
-	<string name="password">Password</string>
-	<string name="save">Save</string>
 
 </resources>
