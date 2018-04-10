@@ -12,13 +12,20 @@ class UserConfiguration(private val context: Context?): Configuration()
 	private val serverUsername = "server_username"
 	private val serverPassword = "server_password"
 
-	override fun getServer(): WebDavInstance
+	override fun getServer(): WebDavInstance?
 	{
 		val r2d2 = R2d2(context)
 		val url = r2d2.decryptData(getString(serverUrl) ?: "")
 		val user = r2d2.decryptData(getString(serverUsername) ?: "")
 		val password = r2d2.decryptData(getString(serverPassword) ?: "")
-		return WebDavInstance(url, user, password)
+		return try
+		{
+			WebDavInstance(url, user, password)
+		}
+		catch (e: Exception)
+		{
+			null
+		}
 	}
 
 	override fun setServer(server: WebDavInstance)

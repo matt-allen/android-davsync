@@ -9,6 +9,6 @@ abstract class Configuration
 	abstract fun isCompressing(): Boolean
 	abstract fun isBatteryOnly(): Boolean
 	abstract fun isWiFiOnly(): Boolean
-	abstract fun getServer(): WebDavInstance
+	abstract fun getServer(): WebDavInstance?
 	abstract fun setServer(server: WebDavInstance)
 }
