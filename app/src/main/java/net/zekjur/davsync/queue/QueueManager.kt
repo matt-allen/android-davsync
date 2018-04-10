@@ -1,6 +1,9 @@
 package net.zekjur.davsync.queue
 
+import android.content.Context
+import com.google.gson.Gson
 import net.zekjur.davsync.model.QueuedTask
+import java.io.File
 
 /**
  * The previous implementation of this used SQLite to provide persistence to the application
@@ -11,13 +14,39 @@ import net.zekjur.davsync.model.QueuedTask
  */
 object QueueManager
 {
-	fun addToQueue(task: QueuedTask)
+	private const val fileName = "queued_uploads.json"
+
+	fun addToQueue(context: Context?, task: QueuedTask)
 	{
-		// TODO Implement
+		val file = loadFile(context)
+		val cache = Gson().fromJson(file, QueueCache::class.java)
+		cache.tasks.add(task)
+		saveFile(context, Gson().toJson(cache))
 	}
 
-	fun loadQueue(): List<QueuedTask>
+	fun loadQueue(context: Context?): List<QueuedTask>
 	{
-		return emptyList() // TODO Implement
+		val file = loadFile(context)
+		val cache = Gson().fromJson(file, QueueCache::class.java)
+		return cache.tasks
 	}
+
+	fun emptyQueue(context: Context?)
+	{
+		File(createAbsoluteFilePath(context)).delete()
+	}
+
+	private fun loadFile(context: Context?): String
+	{
+		return ""
+	}
+
+	private fun saveFile(context: Context?, contents: String?)
+	{
+
+	}
+
+	private fun createAbsoluteFilePath(context: Context?): String = File(context?.filesDir, "cache/$fileName").absolutePath
+
+	private data class QueueCache(val tasks: ArrayList<QueuedTask>)
 }
