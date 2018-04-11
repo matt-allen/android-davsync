@@ -12,6 +12,7 @@ import android.support.v4.app.NotificationManagerCompat
 import net.zekjur.davsync.configuration.Configuration
 import net.zekjur.davsync.configuration.ConfigurationFactory
 import net.zekjur.davsync.model.WebDavInstance
+import java.net.URL
 import java.util.*
 
 class UploadFileTask(private val context: Context, private val uri: Uri): AsyncTask<Unit, Int, Unit>()
@@ -28,6 +29,17 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 		builder.setOngoing(true)
 		builder.priority = NotificationCompat.PRIORITY_LOW
 		createNotification(builder.build())
+
+		// Upload the file
+		val server = getServer()
+		if (server?.isComplete() == false)
+		{
+			builder.setOngoing(false)
+			builder.setContentTitle(context.getString(R.string.set_up_server))
+			builder.setContentText(context.getString(R.string.set_up_server_message))
+			return
+		}
+		val url = URL(Uri.withAppendedPath(Uri.parse(server?.url), filename).toString())
 	}
 
 	/**

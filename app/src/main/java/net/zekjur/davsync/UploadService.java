@@ -1,12 +1,7 @@
 package net.zekjur.davsync;
 
 import android.app.IntentService;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 
 import java.io.InputStream;
@@ -21,16 +16,6 @@ public class UploadService extends IntentService
 	@Override
 	protected void onHandleIntent(Intent intent)
 	{
-		final Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-		final Notification.Builder mBuilder = new Notification.Builder(this);
-		mBuilder.setContentTitle("Uploading to WebDAV server");
-		mBuilder.setContentText(filename);
-		mBuilder.setSmallIcon(android.R.drawable.ic_menu_upload);
-		mBuilder.setOngoing(true);
-		mBuilder.setProgress(100, 30, false);
-		final NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		mNotificationManager.notify(uri.toString(), 0, mBuilder.build());
-
 //		HttpPut httpPut = new HttpPut(webdavUrl + filename);
 
 		ParcelFileDescriptor fd;
@@ -106,10 +91,7 @@ public class UploadService extends IntentService
 //			e.printStackTrace();
 //			mBuilder.setContentText(filename + ": " + e.getLocalizedMessage());
 //		}
-//
-//		// XXX: It would be good to provide an option to try again.
-//		// (or try it again automatically?)
-//		// XXX: possibly we should re-queue the images in the database
+
 //		mBuilder.setContentTitle("Error uploading to WebDAV server");
 //		mBuilder.setProgress(0, 0, false);
 //		mBuilder.setOngoing(false);
