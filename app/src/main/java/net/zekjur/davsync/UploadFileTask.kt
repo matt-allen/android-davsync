@@ -56,6 +56,7 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 				.build()
 		val response = httpClient.newCall(request).execute()
 		// TODO Check the response for everything we need
+		// Track the upload progress: https://stackoverflow.com/questions/35528751/okhttp-3-tracking-multipart-upload-progress
 	}
 
 	/**
