@@ -1,9 +1,15 @@
 package net.zekjur.davsync;
 
 import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
+
+import java.io.InputStream;
 
 public class UploadService extends IntentService
 {
@@ -16,28 +22,19 @@ public class UploadService extends IntentService
 	protected void onHandleIntent(Intent intent)
 	{
 		final Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-		ContentResolver cr = getContentResolver();
+		final Notification.Builder mBuilder = new Notification.Builder(this);
+		mBuilder.setContentTitle("Uploading to WebDAV server");
+		mBuilder.setContentText(filename);
+		mBuilder.setSmallIcon(android.R.drawable.ic_menu_upload);
+		mBuilder.setOngoing(true);
+		mBuilder.setProgress(100, 30, false);
+		final NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		mNotificationManager.notify(uri.toString(), 0, mBuilder.build());
 
-//		String filename = this.filenameFromUri(uri);
-//		if (filename == null)
-//		{
-//			Log.d("davsyncs", "filenameFromUri returned null");
-//			return;
-//		}
-//
-//		final Builder mBuilder = new Notification.Builder(this);
-//		mBuilder.setContentTitle("Uploading to WebDAV server");
-//		mBuilder.setContentText(filename);
-//		mBuilder.setSmallIcon(android.R.drawable.ic_menu_upload);
-//		mBuilder.setOngoing(true);
-//		mBuilder.setProgress(100, 30, false);
-//		final NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//		mNotificationManager.notify(uri.toString(), 0, mBuilder.build());
-//
 //		HttpPut httpPut = new HttpPut(webdavUrl + filename);
-//
-//		ParcelFileDescriptor fd;
-//		InputStream stream;
+
+		ParcelFileDescriptor fd;
+		InputStream stream;
 //		try
 //		{
 //			fd = cr.openFileDescriptor(uri, "r");

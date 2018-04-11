@@ -12,7 +12,7 @@
 		android:label="@string/app_name"
 		android:theme="@style/AppTheme">
 
-		<service android:name="net.zekjur.davsync.UploadService"/>
+		<service android:name="net.zekjur.davsync.service.UploadService"/>
 
 		<activity
 			android:name="net.zekjur.davsync.activity.MainActivity"
