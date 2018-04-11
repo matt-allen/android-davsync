@@ -9,11 +9,14 @@ import android.os.Build
 import android.provider.MediaStore
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
+import android.util.Base64.*
 import net.zekjur.davsync.configuration.Configuration
 import net.zekjur.davsync.configuration.ConfigurationFactory
 import net.zekjur.davsync.model.WebDavInstance
-import java.net.URL
 import java.util.*
+import okhttp3.*
+import java.io.File
+
 
 class UploadFileTask(private val context: Context, private val uri: Uri): AsyncTask<Unit, Int, Unit>()
 {
@@ -39,7 +42,20 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 			builder.setContentText(context.getString(R.string.set_up_server_message))
 			return
 		}
-		val url = URL(Uri.withAppendedPath(Uri.parse(server?.url), filename).toString())
+		val url = Uri.withAppendedPath(Uri.parse(server?.url), filename).toString()
+		val authHeader = "Basic " + encodeToString("${server?.username}:${server?.password}".toByteArray(), NO_WRAP)
+		val httpClient = OkHttpClient()
+		val multiPart = MultipartBody
+				.Builder()
+				.addPart(RequestBody.create(MediaType.parse(resolveMimeType(uri)), File(uri.toString())))
+				.build()
+		val request = Request.Builder()
+				.header("Authorization", authHeader)
+				.url(url)
+				.put(multiPart)
+				.build()
+		val response = httpClient.newCall(request).execute()
+		// TODO Check the response for everything we need
 	}
 
 	/**
@@ -76,6 +92,7 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 		return id
 	}
 
+	private fun resolveMimeType(uri: Uri): String = context.contentResolver.getType(uri)
 	private fun getNotificationManager(): NotificationManagerCompat = NotificationManagerCompat.from(context)
 	private fun getServer(): WebDavInstance? = getConfiguration().getServer()
 	private fun getConfiguration(): Configuration = ConfigurationFactory(context).getConfiguration()
