@@ -2,14 +2,17 @@ package net.zekjur.davsync
 
 import android.app.Notification
 import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Build
 import android.provider.MediaStore
+import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.util.Base64.*
+import android.util.Log
 import net.zekjur.davsync.configuration.Configuration
 import net.zekjur.davsync.configuration.ConfigurationFactory
 import net.zekjur.davsync.model.WebDavInstance
@@ -20,10 +23,13 @@ import java.io.File
 
 class UploadFileTask(private val context: Context, private val uri: Uri): AsyncTask<Unit, Int, Unit>()
 {
+	private val tag = UploadFileTask::class.java.simpleName
 	private val notificationChannel = "uploads"
 
 	override fun doInBackground(vararg p0: Unit?)
 	{
+		Log.d(tag, "Started upload task for media file")
+		Log.d(tag, "Media file is located at: $uri")
 		val filename = resolveFileName(uri)
 		val builder = NotificationCompat.Builder(context, notificationChannel)
 		builder.setSmallIcon(R.drawable.ic_cloud_upload_white_24dp)
@@ -31,7 +37,14 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 		builder.setContentText(filename)
 		builder.setOngoing(true)
 		builder.priority = NotificationCompat.PRIORITY_LOW
-		createNotification(builder.build())
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+		{
+			createNotification(builder.build())
+		}
+		else
+		{
+			createNotificationCompat(builder.build())
+		}
 
 		// Upload the file
 		val server = getServer()
@@ -47,7 +60,7 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 		val httpClient = OkHttpClient()
 		val multiPart = MultipartBody
 				.Builder()
-				.addPart(RequestBody.create(MediaType.parse(resolveMimeType(uri)), File(uri.toString())))
+				.addPart(RequestBody.create(MediaType.parse(resolveMimeType(uri)), context.contentResolver.openInputStream(uri).buffered().readBytes()))
 				.build()
 		val request = Request.Builder()
 				.header("Authorization", authHeader)
@@ -79,17 +92,23 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 		return result
 	}
 
+	@RequiresApi(Build.VERSION_CODES.O)
 	private fun createNotification(notification: Notification): Int
 	{
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
 		{
-//			val name = context.getString(R.string.notification_channel_upload)
-//			val channel = NotificationChannel(notificationChannel, name, NotificationManagerCompat.IMPORTANCE_LOW)
-//			channel.description = context.getString(R.string.notification_channel_upload_description)
-//			getNotificationManager().createNotificationChannel(channel)
+			val name = context.getString(R.string.notification_channel_upload)
+			val channel = NotificationChannel(notificationChannel, name, NotificationManager.IMPORTANCE_LOW)
+			channel.description = context.getString(R.string.notification_channel_upload_description)
+			(context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager)?.createNotificationChannel(channel)
 		}
+		return createNotificationCompat(notification)
+	}
+
+	private fun createNotificationCompat(notification: Notification): Int
+	{
 		val id = Random().nextInt()
-		getNotificationManager().notify(id, notification)
+		getNotificationManager().notify(notificationChannel, id, notification)
 		return id
 	}
 
