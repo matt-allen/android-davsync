@@ -3,13 +3,15 @@ package net.zekjur.davsync.receiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import net.zekjur.davsync.DavSyncOpenHelper
-import net.zekjur.davsync.UploadService
+import net.zekjur.davsync.model.QueuedTask
+import net.zekjur.davsync.queue.QueueManager
+import net.zekjur.davsync.service.UploadService
 
 class NewMediaReceiver : BaseBroadcastReceiver()
 {
 	override fun onReceive(context: Context, intent: Intent)
 	{
+		// TODO Re-do the logging here
 		val isNewPic = android.hardware.Camera.ACTION_NEW_PICTURE == intent.action
 		val isNewVid = android.hardware.Camera.ACTION_NEW_VIDEO == intent.action
 
@@ -42,8 +44,7 @@ class NewMediaReceiver : BaseBroadcastReceiver()
 		{
 			Log.d("davsync", "Queueing " + uri + "for later (not on WIFI)")
 			// otherwise, queue the image for later
-			val helper = DavSyncOpenHelper(context)
-			helper.queueUri(uri)
+			QueueManager.addToQueue(context, QueuedTask(uri))
 		}
 	}
 }

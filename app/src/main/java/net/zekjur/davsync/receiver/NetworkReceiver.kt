@@ -4,29 +4,24 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Uri
-import net.zekjur.davsync.DavSyncOpenHelper
-import net.zekjur.davsync.UploadService
+import net.zekjur.davsync.queue.QueueManager
+import net.zekjur.davsync.service.UploadService
 
 class NetworkReceiver : BaseBroadcastReceiver()
 {
 	override fun onReceive(context: Context, intent: Intent)
 	{
-		if (ConnectivityManager.CONNECTIVITY_ACTION != intent.action)
-		{
-			return
-		}
-
-		if (shouldUpload(context))
+		if (ConnectivityManager.CONNECTIVITY_ACTION == intent.action && shouldUpload(context))
 		{
 			// Upload the queue of parked image/video requests
-			val helper = DavSyncOpenHelper(context)
-			val uris = helper.queuedUris
+			val uris = QueueManager.loadQueue(context)
 			for (uri in uris)
 			{
 				val uploadIntent = Intent(context, UploadService::class.java)
-				uploadIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(uri))
+				uploadIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(uri.uri.toString()))
 				context.startService(uploadIntent)
 			}
+			QueueManager.emptyQueue(context)
 		}
 	}
 }

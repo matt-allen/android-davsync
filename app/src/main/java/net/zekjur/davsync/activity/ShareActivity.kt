@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
-import net.zekjur.davsync.UploadService
+import net.zekjur.davsync.service.UploadService
 
 /**
  * This Activity responds to the Android share intent and posts each of
