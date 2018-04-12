@@ -1,7 +1,9 @@
 package net.zekjur.davsync.activity
 
+import android.Manifest
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
@@ -24,6 +26,7 @@ class MainActivity: AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
 		setContentView(R.layout.activity_main)
 		bottom_bar?.setOnNavigationItemSelectedListener(this)
 		setFragment(ServerDetailsFragment())
+		ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 100)
 	}
 
 	override fun onNavigationItemSelected(item: MenuItem): Boolean
