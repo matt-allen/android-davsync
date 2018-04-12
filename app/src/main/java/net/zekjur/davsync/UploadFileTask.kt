@@ -36,6 +36,7 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 		builder.setContentTitle(context.getString(R.string.uploading_to_webdav_server))
 		builder.setContentText(filename)
 		builder.setOngoing(true)
+		builder.setProgress(100, 0, false)
 		builder.priority = NotificationCompat.PRIORITY_LOW
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
 		{
@@ -60,7 +61,7 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 		val httpClient = OkHttpClient()
 		val multiPart = MultipartBody
 				.Builder()
-				.addPart(RequestBody.create(MediaType.parse(resolveMimeType(uri)), context.contentResolver.openInputStream(uri).buffered().readBytes()))
+				.addPart(RequestBody.create(MediaType.parse(resolveMimeType(uri)), context.contentResolver.openInputStream(uri).buffered().use { it.readBytes() }))
 				.build()
 		val request = Request.Builder()
 				.header("Authorization", authHeader)
@@ -69,6 +70,8 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 				.build()
 		val response = httpClient.newCall(request).execute()
 		// TODO Check the response for everything we need
+		builder.setOngoing(false)
+		builder.setProgress(100, 100, false)
 		// Track the upload progress: https://stackoverflow.com/questions/35528751/okhttp-3-tracking-multipart-upload-progress
 	}
 
