@@ -18,33 +18,36 @@ import net.zekjur.davsync.configuration.ConfigurationFactory
 import net.zekjur.davsync.model.WebDavInstance
 import java.util.*
 import okhttp3.*
-import java.io.File
 
 
-class UploadFileTask(private val context: Context, private val uri: Uri): AsyncTask<Unit, Int, Unit>()
+class UploadFileTask(private val context: Context, private val uri: Uri): AsyncTask<Unit, Int, Unit>(), UploadProgressListener
 {
 	private val tag = UploadFileTask::class.java.simpleName
+
 	private val notificationChannel = "uploads"
+	private val builder = NotificationCompat.Builder(context, notificationChannel)
+	private var notificationId = 0
 
 	override fun doInBackground(vararg p0: Unit?)
 	{
 		Log.d(tag, "Started upload task for media file")
 		Log.d(tag, "Media file is located at: $uri")
 		val filename = resolveFileName(uri)
-		val builder = NotificationCompat.Builder(context, notificationChannel)
+
 		builder.setSmallIcon(R.drawable.ic_cloud_upload_white_24dp)
 		builder.setContentTitle(context.getString(R.string.uploading_to_webdav_server))
 		builder.setContentText(filename)
 		builder.setOngoing(true)
 		builder.setProgress(100, 0, false)
 		builder.priority = NotificationCompat.PRIORITY_LOW
+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
 		{
-			createNotification(builder.build())
+			notificationId = createNotification(builder.build())
 		}
 		else
 		{
-			createNotificationCompat(builder.build())
+			notificationId = createNotificationCompat(builder.build())
 		}
 
 		// Upload the file
@@ -61,7 +64,7 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 		val httpClient = OkHttpClient()
 		val multiPart = MultipartBody
 				.Builder()
-				.addPart(RequestBody.create(MediaType.parse(resolveMimeType(uri)), context.contentResolver.openInputStream(uri).buffered().use { it.readBytes() }))
+				.addPart(ProgressRequestBody(RequestBody.create(MediaType.parse(resolveMimeType(uri)), context.contentResolver.openInputStream(uri).buffered().use { it.readBytes() }), this))
 				.build()
 		val request = Request.Builder()
 				.header("Authorization", authHeader)
@@ -70,9 +73,13 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 				.build()
 		val response = httpClient.newCall(request).execute()
 		// TODO Check the response for everything we need
-		builder.setOngoing(false)
-		builder.setProgress(100, 100, false)
+		getNotificationManager().cancel(notificationChannel, notificationId)
 		// Track the upload progress: https://stackoverflow.com/questions/35528751/okhttp-3-tracking-multipart-upload-progress
+	}
+
+	override fun onProgressChanged(progress: Int)
+	{
+		builder.setProgress(100, progress, false)
 	}
 
 	/**
