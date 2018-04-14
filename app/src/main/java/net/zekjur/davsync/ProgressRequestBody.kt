@@ -1,5 +1,6 @@
 package net.zekjur.davsync
 
+import android.util.Log
 import okhttp3.MediaType
 import okhttp3.RequestBody
 import okio.*
@@ -41,13 +42,17 @@ class ProgressRequestBody(private val body: RequestBody, private val listener: U
 
 private class CountingSink(sink: Sink, private val contentLength: Long, private val listener: UploadProgressListener): ForwardingSink(sink)
 {
+	private val tag = CountingSink::class.java.simpleName
 	private var bytesWritten: Long = 0
 
 	override fun write(source: Buffer?, byteCount: Long)
 	{
 		super.write(source!!, byteCount)
 		bytesWritten += byteCount
-		listener.onProgressChanged((100f * bytesWritten / contentLength).toInt())
+		val progress = (100f * bytesWritten / contentLength).toInt()
+		listener.onProgressChanged(progress)
+		Log.d(tag, "Writing output bytes $byteCount")
+		Log.d(tag, "Total bytes $bytesWritten ($progress/100)")
 	}
 }
 

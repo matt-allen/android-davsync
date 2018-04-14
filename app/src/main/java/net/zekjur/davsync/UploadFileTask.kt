@@ -13,6 +13,7 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.util.Base64.*
 import android.util.Log
+import android.widget.RemoteViews
 import net.zekjur.davsync.configuration.Configuration
 import net.zekjur.davsync.configuration.ConfigurationFactory
 import net.zekjur.davsync.model.WebDavInstance
@@ -40,15 +41,7 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 		builder.setOngoing(true)
 		builder.setProgress(100, 0, false)
 		builder.priority = NotificationCompat.PRIORITY_LOW
-
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-		{
-			notificationId = createNotification(builder.build())
-		}
-		else
-		{
-			notificationId = createNotificationCompat(builder.build())
-		}
+		updateNotification()
 
 		// Upload the file
 		val server = getServer()
@@ -73,13 +66,26 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 				.build()
 		val response = httpClient.newCall(request).execute()
 		// TODO Check the response for everything we need
-		getNotificationManager().cancel(notificationChannel, notificationId)
-		// Track the upload progress: https://stackoverflow.com/questions/35528751/okhttp-3-tracking-multipart-upload-progress
+		if (response.isSuccessful)
+		{
+			getNotificationManager().cancel(notificationChannel, notificationId)
+		}
+		else
+		{
+			builder.setContentTitle(context.getString(R.string.upload_failed))
+			builder.setOngoing(false)
+			if (response.code() == 401)
+			{
+				builder.setContentText(context.getString(R.string.incorrect_username_password))
+			}
+			updateNotification()
+		}
 	}
 
 	override fun onProgressChanged(progress: Int)
 	{
 		builder.setProgress(100, progress, false)
+		updateNotification()
 	}
 
 	/**
@@ -102,6 +108,18 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 		return result
 	}
 
+	private fun updateNotification()
+	{
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+		{
+			notificationId = createNotification(builder.build())
+		}
+		else
+		{
+			notificationId = createNotificationCompat(builder.build())
+		}
+	}
+
 	@RequiresApi(Build.VERSION_CODES.O)
 	private fun createNotification(notification: Notification): Int
 	{
@@ -117,9 +135,12 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 
 	private fun createNotificationCompat(notification: Notification): Int
 	{
-		val id = Random().nextInt()
-		getNotificationManager().notify(notificationChannel, id, notification)
-		return id
+		if (notificationId == 0)
+		{
+			notificationId = Random().nextInt()
+		}
+		getNotificationManager().notify(notificationChannel, notificationId, notification)
+		return notificationId
 	}
 
 	private fun resolveMimeType(uri: Uri): String = context.contentResolver.getType(uri)
