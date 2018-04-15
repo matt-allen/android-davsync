@@ -9,9 +9,10 @@ import net.zekjur.davsync.service.UploadService
 
 class NewMediaReceiver : BaseBroadcastReceiver()
 {
+	private val tag = NewMediaReceiver::class.java.simpleName
+
 	override fun onReceive(context: Context, intent: Intent)
 	{
-		// TODO Re-do the logging here
 		val isNewPic = android.hardware.Camera.ACTION_NEW_PICTURE == intent.action
 		val isNewVid = android.hardware.Camera.ACTION_NEW_VIDEO == intent.action
 
@@ -22,27 +23,27 @@ class NewMediaReceiver : BaseBroadcastReceiver()
 
 		if (isNewPic && !getConfiguration(context).isUploadingImages())
 		{
-			Log.d("davsync", "automatic camera picture sync is disabled, ignoring")
+			Log.d(tag, "User does not want images uploaded")
 			return
 		}
 
 		if (isNewVid && !getConfiguration(context).isUploadingVideos())
 		{
-			Log.d("davsync", "automatic camera video sync is disabled, ignoring")
+			Log.d(tag, "User does not want videos uploaded")
 			return
 		}
 
 		val uri = intent.data
 		if (shouldUpload(context))
 		{
-			Log.d("davsync", "Trying to upload $uri immediately (on WIFI)")
+			Log.d(tag, "Trying to upload $uri immediately (on WiFi)")
 			val ulIntent = Intent(context, UploadService::class.java)
 			ulIntent.putExtra(Intent.EXTRA_STREAM, uri)
 			context.startService(ulIntent)
 		}
 		else
 		{
-			Log.d("davsync", "Queueing " + uri + "for later (not on WIFI)")
+			Log.d(tag, "Queueing $uri for later (not on WiFi)")
 			// otherwise, queue the image for later
 			QueueManager.addToQueue(context, QueuedTask(uri))
 		}
