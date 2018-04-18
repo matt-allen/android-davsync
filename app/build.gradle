@@ -7,7 +7,7 @@ android {
 	buildToolsVersion "27.0.3"
 
 	defaultConfig {
-		applicationId "com.mattallen.davsync"
+		applicationId "com.mallen.photobackup"
 		minSdkVersion 16
 		targetSdkVersion 27
 	}

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<string name="app_name">WebDAV Sync</string>
+	<string name="app_name">Photo Backup</string>
 	<string name="uploading_to_webdav_server">Uploading to WebDAV server</string>
 	<string name="server">Server</string>
 	<string name="settings">Settings</string>

@@ -12,10 +12,10 @@
 		android:label="@string/app_name"
 		android:theme="@style/AppTheme">
 
-		<service android:name="net.zekjur.davsync.service.UploadService"/>
+		<service android:name="com.mallen.photobackup.service.UploadService"/>
 
 		<activity
-			android:name="net.zekjur.davsync.activity.MainActivity"
+			android:name="com.mallen.photobackup.activity.MainActivity"
 			android:label="@string/app_name"
 			android:theme="@style/AppTheme">
 
@@ -27,7 +27,7 @@
 		</activity>
 
 		<activity
-			android:name="net.zekjur.davsync.activity.ShareActivity"
+			android:name="com.mallen.photobackup.activity.ShareActivity"
 			android:excludeFromRecents="true"
 			android:theme="@android:style/Theme.NoDisplay">
 
@@ -48,7 +48,7 @@
 
 		</activity>
 
-		<receiver android:name="net.zekjur.davsync.receiver.NetworkReceiver">
+		<receiver android:name="com.mallen.photobackup.receiver.NetworkReceiver">
 
 			<intent-filter>
 				<action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
@@ -56,7 +56,7 @@
 
 		</receiver>
 
-		<receiver android:name="net.zekjur.davsync.receiver.NewMediaReceiver">
+		<receiver android:name="com.mallen.photobackup.receiver.NewMediaReceiver">
 
 			<intent-filter>
 				<action android:name="android.hardware.action.NEW_PICTURE"/>
