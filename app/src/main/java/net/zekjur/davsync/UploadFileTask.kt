@@ -13,7 +13,6 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import android.util.Base64.*
 import android.util.Log
-import android.widget.RemoteViews
 import net.zekjur.davsync.configuration.Configuration
 import net.zekjur.davsync.configuration.ConfigurationFactory
 import net.zekjur.davsync.model.WebDavInstance
@@ -26,8 +25,8 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 	private val tag = UploadFileTask::class.java.simpleName
 
 	private val notificationChannel = "uploads"
-	private val builder = NotificationCompat.Builder(context, notificationChannel)
-	private var notificationId = 0
+	private val progressNotification = NotificationCompat.Builder(context, notificationChannel)
+	private var progressNotificationId = 0
 
 	override fun doInBackground(vararg p0: Unit?)
 	{
@@ -35,56 +34,51 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 		Log.d(tag, "Media file is located at: $uri")
 		val filename = resolveFileName(uri)
 
-		builder.setSmallIcon(R.drawable.ic_cloud_upload_white_24dp)
-		builder.setContentTitle(context.getString(R.string.uploading_to_webdav_server))
-		builder.setContentText(filename)
-		builder.setOngoing(true)
-		builder.setProgress(100, 0, false)
-		builder.priority = NotificationCompat.PRIORITY_LOW
+		progressNotification.setSmallIcon(R.drawable.ic_cloud_upload_white_24dp)
+		progressNotification.setContentTitle(context.getString(R.string.uploading_to_webdav_server))
+		progressNotification.setContentText(filename)
+		progressNotification.setOngoing(true)
+		progressNotification.setProgress(100, 0, false)
+		progressNotification.priority = NotificationCompat.PRIORITY_LOW
 		updateNotification()
 
 		// Upload the file
 		val server = getServer()
 		if (server?.isComplete() == false)
 		{
-			builder.setOngoing(false)
-			builder.setContentTitle(context.getString(R.string.set_up_server))
-			builder.setContentText(context.getString(R.string.set_up_server_message))
+			progressNotification.setOngoing(false)
+			progressNotification.setContentTitle(context.getString(R.string.set_up_server))
+			progressNotification.setContentText(context.getString(R.string.set_up_server_message))
 			return
 		}
 		val url = Uri.withAppendedPath(Uri.parse(server?.url), filename).toString()
 		val authHeader = "Basic " + encodeToString("${server?.username}:${server?.password}".toByteArray(), NO_WRAP)
 		val httpClient = OkHttpClient()
-		val multiPart = MultipartBody
-				.Builder()
-				.addPart(ProgressRequestBody(RequestBody.create(MediaType.parse(resolveMimeType(uri)), context.contentResolver.openInputStream(uri).buffered().use { it.readBytes() }), this))
-				.build()
+		val body = ProgressRequestBody(RequestBody.create(MediaType.parse(resolveMimeType(uri)), context.contentResolver.openInputStream(uri).buffered().use { it.readBytes() }), this)
 		val request = Request.Builder()
 				.header("Authorization", authHeader)
 				.url(url)
-				.put(multiPart)
+				.put(body)
 				.build()
 		val response = httpClient.newCall(request).execute()
-		// TODO Check the response for everything we need
-		if (response.isSuccessful)
+		getNotificationManager().cancel(notificationChannel, progressNotificationId)
+
+		if (!response.isSuccessful)
 		{
-			getNotificationManager().cancel(notificationChannel, notificationId)
-		}
-		else
-		{
-			builder.setContentTitle(context.getString(R.string.upload_failed))
-			builder.setOngoing(false)
+			val endNotification = NotificationCompat.Builder(context, notificationChannel)
+			endNotification.setContentTitle(context.getString(R.string.upload_failed))
+			endNotification.setOngoing(false)
 			if (response.code() == 401)
 			{
-				builder.setContentText(context.getString(R.string.incorrect_username_password))
+				endNotification.setContentText(context.getString(R.string.incorrect_username_password))
 			}
-			updateNotification()
+			getNotificationManager().notify(notificationChannel, Random().nextInt(), endNotification.build())
 		}
 	}
 
 	override fun onProgressChanged(progress: Int)
 	{
-		builder.setProgress(100, progress, false)
+		progressNotification.setProgress(100, progress, false)
 		updateNotification()
 	}
 
@@ -112,11 +106,11 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 	{
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
 		{
-			notificationId = createNotification(builder.build())
+			progressNotificationId = createNotification(progressNotification.build())
 		}
 		else
 		{
-			notificationId = createNotificationCompat(builder.build())
+			progressNotificationId = createNotificationCompat(progressNotification.build())
 		}
 	}
 
@@ -135,12 +129,12 @@ class UploadFileTask(private val context: Context, private val uri: Uri): AsyncT
 
 	private fun createNotificationCompat(notification: Notification): Int
 	{
-		if (notificationId == 0)
+		if (progressNotificationId == 0)
 		{
-			notificationId = Random().nextInt()
+			progressNotificationId = Random().nextInt()
 		}
-		getNotificationManager().notify(notificationChannel, notificationId, notification)
-		return notificationId
+		getNotificationManager().notify(notificationChannel, progressNotificationId, notification)
+		return progressNotificationId
 	}
 
 	private fun resolveMimeType(uri: Uri): String = context.contentResolver.getType(uri)
