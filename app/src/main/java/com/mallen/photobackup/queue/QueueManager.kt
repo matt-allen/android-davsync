@@ -18,17 +18,36 @@ object QueueManager
 
 	fun addToQueue(context: Context?, task: QueuedTask)
 	{
-		val file = loadFile(context)
-		val cache = Gson().fromJson(file, QueueCache::class.java)
-		cache.tasks.add(task)
+		val cache = ArrayList<QueuedTask>()
+		try
+		{
+			val file = loadFile(context)
+			val fromDisk = Gson().fromJson(file, QueueCache::class.java)
+			if (fromDisk != null)
+			{
+				cache.addAll(fromDisk.tasks)
+			}
+		}
+		catch (e: Exception)
+		{
+			e.printStackTrace()
+		}
+		cache.add(task)
 		saveFile(context, Gson().toJson(cache))
 	}
 
 	fun loadQueue(context: Context?): List<QueuedTask>
 	{
 		val file = loadFile(context)
-		val cache = Gson().fromJson(file, QueueCache::class.java)
-		return cache.tasks
+		return try
+		{
+			val cache = Gson().fromJson(file, QueueCache::class.java)
+			cache.tasks
+		}
+		catch (e: Exception)
+		{
+			emptyList()
+		}
 	}
 
 	fun emptyQueue(context: Context?)
@@ -38,15 +57,26 @@ object QueueManager
 
 	private fun loadFile(context: Context?): String
 	{
-		return ""
+		return try
+		{
+			val path = createAbsoluteFilePath(context)
+			var contents = ""
+			File(path).bufferedReader().use { it.forEachLine { contents += it } }
+			contents
+		}
+		catch (e: Exception)
+		{
+			""
+		}
 	}
 
 	private fun saveFile(context: Context?, contents: String?)
 	{
-
+		val path = createAbsoluteFilePath(context)
+		File(path).bufferedWriter().use { it.write(contents) }
 	}
 
-	private fun createAbsoluteFilePath(context: Context?): String = File(context?.filesDir, "cache/${fileName}").absolutePath
+	private fun createAbsoluteFilePath(context: Context?): String = File(context?.filesDir, "cache/$fileName").absolutePath
 
 	private data class QueueCache(val tasks: ArrayList<QueuedTask>)
 }
