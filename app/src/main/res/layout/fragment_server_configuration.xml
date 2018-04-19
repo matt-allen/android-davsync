@@ -30,6 +30,7 @@
 				android:id="@+id/url"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
+				android:inputType="textUri"
 				android:hint="@string/server_url"/>
 
 		</android.support.design.widget.TextInputLayout>
@@ -43,6 +44,7 @@
 				android:id="@+id/username"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
+				android:inputType="text"
 				android:hint="@string/username"/>
 
 		</android.support.design.widget.TextInputLayout>
