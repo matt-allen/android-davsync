@@ -1,6 +1,7 @@
 package com.mallen.photobackup.activity
 
 import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v4.app.ActivityCompat
@@ -11,6 +12,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import com.mallen.photobackup.R
 import com.mallen.photobackup.fragment.ServerDetailsFragment
 import com.mallen.photobackup.fragment.SettingsFragment
+import com.mallen.photobackup.helper.JobHelper
 
 /**
  * Entry point of the application where the user can control
@@ -27,6 +29,10 @@ class MainActivity: AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
 		bottom_bar?.setOnNavigationItemSelectedListener(this)
 		setFragment(ServerDetailsFragment())
 		ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 100)
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+		{
+			JobHelper.scheduleMediaJob(this)
+		}
 	}
 
 	override fun onNavigationItemSelected(item: MenuItem): Boolean
