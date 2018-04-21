@@ -73,7 +73,19 @@ object QueueManager
 	private fun saveFile(context: Context?, contents: String?)
 	{
 		val path = createAbsoluteFilePath(context)
-		File(path).bufferedWriter().use { it.write(contents) }
+		val file = File(path)
+		try
+		{
+			if (file.parentFile.mkdirs())
+			{
+				file.createNewFile()
+			}
+		}
+		catch (e: Exception)
+		{
+			e.printStackTrace()
+		}
+		file.bufferedWriter().use { it.write(contents) }
 	}
 
 	private fun createAbsoluteFilePath(context: Context?): String = File(context?.filesDir, "cache/$fileName").absolutePath
